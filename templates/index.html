@@ -2,55 +2,78 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Погода</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 </head>
-<body class="bg-light">
+<body>
 
-<div class="container mt-4">
-    <h1 class="text-center mb-4">🌍 Погода</h1>
+<div class="container">
+    <h1>Прогноз Погоды</h1>
 
     <!-- Поиск города -->
-    <form method="post" class="d-flex justify-content-center mb-4">
-        <input type="text" name="city" class="form-control w-50" placeholder="Введите город">
-        <button class="btn btn-primary ms-2">Поиск</button>
+    <form method="post">
+        <div class="d-flex">
+            <input type="text" name="city" placeholder="Введите город..." value="{{ request.form.get('city', 'Алматы' ) }}">
+            <button type="submit">➔</button>
+        </div>
     </form>
 
     {% if weather %}
-    <!-- Карточка текущей погоды -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-body text-center">
+    <div class="card main-weather-card">
+        <div class="card-body">
             <h2>{{ weather.city }}</h2>
-            <img src="http://openweathermap.org/img/wn/{{ weather.icon }}@2x.png" alt="icon">
+            <img src="http://openweathermap.org/img/wn/{{ weather.icon }}@4x.png" alt="weather icon">
             <h3>{{ weather.temp }}°C</h3>
-            <p>Ощущается как: {{ weather.feels_like }}°C</p>
             <p>{{ weather.description }}</p>
-            <p>Влажность: {{ weather.humidity }}%, Давление: {{ weather.pressure }} гПа</p>
-            <p>Ветер: {{ weather.wind }} м/с</p>
-            <p>🌅 Восход: {{ weather.sunrise }} | 🌇 Закат: {{ weather.sunset }}</p>
-            {% if advice %}<p class="fw-bold text-danger">{{ advice }}</p>{% endif %}
+
+            <div class="weather-details">
+                <div class="weather-detail-item">
+                    <span>Ощущается как</span>
+                    <strong>{{ weather.feels_like }}°C</strong>
+                </div>
+                <div class="weather-detail-item">
+                    <span>Влажность</span>
+                    <strong>{{ weather.humidity }}%</strong>
+                </div>
+                <div class="weather-detail-item">
+                    <span>Ветер</span>
+                    <strong>{{ weather.wind }} м/с</strong>
+                </div>
+                <div class="weather-detail-item">
+                    <span>Восход</span>
+                    <strong>{{ weather.sunrise }}</strong>
+                </div>
+                 <div class="weather-detail-item">
+                    <span>Закат</span>
+                    <strong>{{ weather.sunset }}</strong>
+                </div>
+            </div>
+            
+            {% if advice %}
+            <p class="fw-bold text-danger">{{ advice }}</p>
+            {% endif %}
         </div>
     </div>
 
-    <!-- Прогноз -->
     <h3 class="text-center">Прогноз на 3 дня</h3>
     <div class="row">
         {% for f in forecast %}
-        <div class="col-md-4 mb-3">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h5>{{ f.date }}</h5>
-                    <img src="http://openweathermap.org/img/wn/{{ f.icon }}.png" alt="icon">
-                    <p>{{ f.temp }}°C</p>
-                    <small>{{ f.description }}</small>
-                </div>
+        <div class="card forecast-card" style="--index: {{ loop.index0 }};">
+            <div class="card-body">
+                <h5>{{ f.date }}</h5>
+                <img src="http://openweathermap.org/img/wn/{{ f.icon }}@2x.png" alt="forecast icon">
+                <p>{{ f.temp }}°C</p>
+                <small>{{ f.description }}</small>
             </div>
         </div>
         {% endfor %}
     </div>
     {% else %}
-        <p class="text-center text-danger">Город не найден</p>
+        <p class="text-danger">Город не найден. Попробуйте еще раз.</p>
     {% endif %}
 </div>
 

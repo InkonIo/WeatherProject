@@ -4,7 +4,6 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# Ваш API ключ от OpenWeatherMap
 API_KEY = "d25be7881e448482385df1a9ee215eac"
 
 
@@ -12,7 +11,7 @@ def get_weather(city):
     """Получение текущей погоды для города"""
     try:
         url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}&units=metric&lang=ru"
-        response = requests.get(url, timeout=5)
+        response = requests.get(url, timeout=5 )
         data = response.json()
 
         if data.get("cod") != 200:
@@ -39,14 +38,13 @@ def get_forecast(city):
     """Получение прогноза на 3 дня"""
     try:
         url = f"http://api.openweathermap.org/data/2.5/forecast?q={city}&appid={API_KEY}&units=metric&lang=ru"
-        response = requests.get(url, timeout=5)
+        response = requests.get(url, timeout=5 )
         data = response.json()
 
         if data.get("cod") != "200":
             return []
 
         forecast = []
-        # Берем прогноз на каждый день (каждые 24 часа = 8 записей по 3 часа)
         for i in range(0, min(24, len(data["list"])), 8):
             item = data["list"][i]
             date_obj = datetime.fromtimestamp(item["dt"])
@@ -60,7 +58,7 @@ def get_forecast(city):
                 }
             )
 
-        return forecast[:3]  # Возвращаем только 3 дня
+        return forecast[:3]
 
     except Exception as e:
         print(f"Ошибка получения прогноза: {e}")
@@ -103,20 +101,16 @@ def index():
     forecast = []
     advice = None
 
-    # Определяем город для поиска
     if request.method == "POST":
         city = request.form.get("city", "").strip()
     else:
-        city = "Алматы"  # Город по умолчанию
+        city = "Алматы"
 
     if city:
-        # Получаем данные о погоде
         weather = get_weather(city)
 
         if weather:
-            # Получаем прогноз
             forecast = get_forecast(city)
-            # Генерируем совет
             advice = get_weather_advice(weather)
 
     return render_template("index.html", weather=weather, forecast=forecast, advice=advice)
