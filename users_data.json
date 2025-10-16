@@ -1,6 +1,6 @@
 {
   "788887263": {
-    "city": "Нью-Йорк",
+    "city": "Караганда",
     "username": "pohuymneprosto",
     "registered_at": "2025-10-16T13:53:07.591033",
     "subscription_end": "2025-11-15T14:21:28.238930",
@@ -8,18 +8,57 @@
     "last_payment": "2025-10-16T14:21:28.238943"
   },
   "7541069765": {
-    "city": "Лондон",
+    "city": "Tokyo",
     "username": "Inkonio",
-    "registered_at": "2025-10-16T13:54:24.642848"
+    "registered_at": "2025-10-16T13:54:24.642848",
+    "subscription_end": "2025-11-19T14:21:28.238930",
+    "is_premium": true,
+    "last_payment": "2025-10-16T14:21:28.238943"
   },
   "773637630": {
     "city": "Нью-Йорк",
     "username": "bebp00",
-    "registered_at": "2025-10-16T14:01:19.793622"
+    "registered_at": "2025-10-19T14:01:19.793622"
   },
   "921259781": {
     "city": "Алматы",
     "username": "t0mka0",
     "registered_at": "2025-10-16T13:58:10.587855"
+  },
+  "7585029685": {
+    "city": "Лихтенштейн",
+    "username": "pohuymneyzhasno",
+    "registered_at": "2025-10-16T14:25:40.074420",
+    "subscription_end": "2025-11-15T14:21:28.238930",
+    "is_premium": true,
+    "last_payment": "2025-10-17T14:21:28.238943"
+  },
+  "1347519308": {
+    "city": null,
+    "username": "qweqweqweggezlol",
+    "registered_at": "2025-10-16T14:38:26.687860",
+    "subscription_end": null,
+    "is_premium": false
+  },
+  "967613427": {
+    "city": null,
+    "username": "DimasikPopuAss",
+    "registered_at": "2025-10-16T14:52:00.574834",
+    "subscription_end": null,
+    "is_premium": false
+  },
+  "727922473": {
+    "city": null,
+    "username": "dafimods",
+    "registered_at": "2025-10-16T15:03:57.402546",
+    "subscription_end": null,
+    "is_premium": true
+  },
+  "755376699": {
+    "city": null,
+    "username": null,
+    "registered_at": "2025-10-16T15:51:10.584395",
+    "subscription_end": null,
+    "is_premium": true
   }
 }
