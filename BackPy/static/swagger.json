@@ -1,0 +1,210 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "MeteoSphere Weather API",
+    "description": "API для получения данных о погоде и аутентификации через Telegram. Используется для веб-приложения MeteoSphere.",
+    "version": "1.0.0"
+  },
+  "host": "localhost:8080",
+  "basePath": "/api",
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/auth/telegram_code": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Аутентификация по коду из Telegram",
+        "description": "Проверяет 6-значный код, полученный пользователем от Telegram-бота, и выдает JWT-токен.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "telegram_id": {
+                  "type": "integer",
+                  "description": "ID пользователя в Telegram."
+                },
+                "code": {
+                  "type": "string",
+                  "description": "6-значный код, сгенерированный ботом."
+                }
+              },
+              "required": [
+                "telegram_id",
+                "code"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешная аутентификация",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "msg": {
+                  "type": "string"
+                },
+                "access_token": {
+                  "type": "string",
+                  "description": "JWT-токен для доступа к защищенным маршрутам."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Неверный код или код истек"
+          }
+        }
+      }
+    },
+    "/user/me": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Получение данных о текущем пользователе",
+        "description": "Возвращает информацию о пользователе, если предоставлен действительный JWT-токен.",
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешный ответ",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "telegram_id": {
+                  "type": "integer"
+                },
+                "username": {
+                  "type": "string"
+                },
+                "city": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Неавторизованный доступ"
+          }
+        }
+      }
+    },
+    "/weather/data": {
+      "get": {
+        "tags": [
+          "Weather"
+        ],
+        "summary": "Получение полного прогноза погоды",
+        "description": "Возвращает текущую погоду, прогноз на 3 дня, качество воздуха и УФ-индекс для города пользователя.",
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "city",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Город для получения погоды. Если не указан, используется город из профиля пользователя."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешный ответ",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "weather": {
+                  "type": "object"
+                },
+                "forecast": {
+                  "type": "array"
+                },
+                "air_quality": {
+                  "type": "object"
+                },
+                "uv_index": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Неавторизованный доступ"
+          },
+          "404": {
+            "description": "Город не найден"
+          }
+        }
+      }
+    },
+    "/weather/city": {
+      "post": {
+        "tags": [
+          "Weather"
+        ],
+        "summary": "Установка города для пользователя",
+        "description": "Устанавливает или обновляет город в профиле пользователя.",
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "city": {
+                  "type": "string",
+                  "description": "Название города."
+                }
+              },
+              "required": [
+                "city"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Город успешно установлен"
+          },
+          "401": {
+            "description": "Неавторизованный доступ"
+          },
+          "404": {
+            "description": "Город не найден"
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "Bearer": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header",
+      "description": "JWT токен в формате 'Bearer <token>'"
+    }
+  }
+}
