@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Moon Phase Visualizer</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0a0e27 0%, #16213e 100%);
+      color: white;
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+      gap: 40px;
+      padding: 40px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .moon-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      flex: 1;
+    }
+
+    #renderCanvas {
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      box-shadow: 0 0 60px rgba(100, 200, 255, 0.3);
+      background: #000;
+    }
+
+    .moon-info {
+      text-align: center;
+      font-size: 24px;
+      font-weight: 300;
+      letter-spacing: 2px;
+      margin-top: 20px;
+    }
+
+    .moon-info .phase-name {
+      font-size: 32px;
+      font-weight: 500;
+      color: #64c8ff;
+      margin-bottom: 10px;
+    }
+
+    .moon-info .illumination {
+      font-size: 16px;
+      color: #999;
+    }
+
+    .calendar-section {
+      flex: 1;
+      background: rgba(20, 30, 60, 0.8);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(100, 200, 255, 0.3);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(100, 200, 255, 0.2);
+    }
+
+    .calendar-nav button {
+      background: rgba(100, 200, 255, 0.1);
+      border: 1px solid rgba(100, 200, 255, 0.3);
+      color: #64c8ff;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      transition: all 0.3s ease;
+    }
+
+    .calendar-nav button:hover {
+      background: rgba(100, 200, 255, 0.3);
+      transform: scale(1.1);
+    }
+
+    .month-year {
+      font-size: 24px;
+      font-weight: 500;
+      color: #64c8ff;
+      letter-spacing: 1px;
+    }
+
+    .weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+      margin-bottom: 15px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: #64c8ff;
+      opacity: 0.7;
+      padding: 0 5px;
+    }
+
+    .weekdays div {
+      padding: 10px 0;
+    }
+
+    .days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+    }
+
+    .day {
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(100, 200, 255, 0.2);
+      border-radius: 10px;
+      background: rgba(10, 20, 40, 0.5);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .day:hover {
+      background: rgba(100, 200, 255, 0.15);
+      border-color: rgba(100, 200, 255, 0.5);
+      transform: translateY(-2px);
+    }
+
+    .day.today {
+      background: rgba(100, 200, 255, 0.2);
+      border-color: #64c8ff;
+    }
+
+    .day.other-month {
+      opacity: 0.3;
+      cursor: default;
+    }
+
+    .day.other-month:hover {
+      background: rgba(10, 20, 40, 0.5);
+      border-color: rgba(100, 200, 255, 0.2);
+      transform: none;
+    }
+
+    .day-number {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .day-moon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    .upcoming {
+      margin-top: 30px;
+      padding-top: 30px;
+      border-top: 1px solid rgba(100, 200, 255, 0.2);
+    }
+
+    .upcoming-title {
+      font-size: 14px;
+      color: #64c8ff;
+      font-weight: 600;
+      margin-bottom: 15px;
+      letter-spacing: 1px;
+    }
+
+    .upcoming-events {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .event {
+      background: rgba(100, 200, 255, 0.1);
+      border-left: 3px solid #64c8ff;
+      padding: 10px 15px;
+      border-radius: 5px;
+      font-size: 13px;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 1400px) {
+      .container {
+        flex-direction: column;
+        padding: 20px;
+        gap: 30px;
+      }
+
+      #renderCanvas {
+        width: 350px;
+        height: 350px;
+      }
+
+      .calendar-section {
+        width: 100%;
+        max-width: 500px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="moon-section">
+      <canvas id="renderCanvas"></canvas>
+      <div class="moon-info">
+        <div class="phase-name" id="phaseName">--</div>
+        <div class="illumination" id="illumination">-- %</div>
+      </div>
+    </div>
+
+    <div class="calendar-section">
+      <div class="calendar-header">
+        <div class="calendar-nav">
+          <button id="prevMonth">‹</button>
+        </div>
+        <div class="month-year" id="monthYear"></div>
+        <div class="calendar-nav">
+          <button id="nextMonth">›</button>
+        </div>
+      </div>
+
+      <div class="weekdays">
+        <div>ПН</div>
+        <div>ВТ</div>
+        <div>СР</div>
+        <div>ЧТ</div>
+        <div>ПТ</div>
+        <div>СБ</div>
+        <div>ВС</div>
+      </div>
+
+      <div class="days-grid" id="daysGrid"></div>
+
+      <div class="upcoming">
+        <div class="upcoming-title">БЛИЖАЙШИЕ ФАЗЫ</div>
+        <div class="upcoming-events" id="upcomingEvents"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Babylon.js -->
+  <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+  <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
+
+  <script>
+    const LATITUDE = '43.238949';
+    const LONGITUDE = '76.889709';
+    let currentDate = new Date();
+    let currentMonth = new Date();
+
+    // ===== BABYLON.JS SETUP =====
+    const canvas = document.getElementById('renderCanvas');
+    const engine = new BABYLON.Engine(canvas, true);
+
+    function createScene() {
+      const scene = new BABYLON.Scene(engine);
+      scene.clearColor = new BABYLON.Color3(0.04, 0.08, 0.15);
+
+      const camera = new BABYLON.ArcRotateCamera(
+        'camera',
+        Math.PI / 2,
+        Math.PI / 2,
+        3,
+        BABYLON.Vector3.Zero(),
+        scene
+      );
+      camera.attachControl(canvas, true);
+      camera.lowerRadiusLimit = 2.5;
+      camera.upperRadiusLimit = 4;
+
+      const moon = BABYLON.MeshBuilder.CreateSphere('moon', { diameter: 2, segments: 128 }, scene);
+
+      const moonMaterial = new BABYLON.StandardMaterial('moonMaterial', scene);
+      moonMaterial.diffuseTexture = new BABYLON.Texture(
+        'https://cdn.jsdelivr.net/gh/mrdoob/three.js@master/examples/textures/planets/moon_1024.jpg',
+        scene
+      );
+      moonMaterial.specularColor = new BABYLON.Color3(0.15, 0.15, 0.15);
+      moonMaterial.specularPower = 20;
+      moon.material = moonMaterial;
+
+      const ambientLight = new BABYLON.HemisphericLight(
+        'hemiLight',
+        new BABYLON.Vector3(0, 1, 0),
+        scene
+      );
+      ambientLight.intensity = 0.15;
+
+      const sunLight = new BABYLON.DirectionalLight(
+        'sunLight',
+        new BABYLON.Vector3(1, 0, 0),
+        scene
+      );
+      sunLight.intensity = 1;
+
+      const fillLight = new BABYLON.PointLight('fillLight', new BABYLON.Vector3(-1, 0, -1), scene);
+      fillLight.intensity = 0.1;
+
+      // Атмосфера луны
+      const atmosphere = BABYLON.MeshBuilder.CreateSphere('atmosphere', { diameter: 2.05, segments: 64 }, scene);
+      const atmosphereMaterial = new BABYLON.StandardMaterial('atmosphereMaterial', scene);
+      atmosphereMaterial.emissiveColor = new BABYLON.Color3(0.1, 0.15, 0.25);
+      atmosphereMaterial.alpha = 0.2;
+      atmosphere.material = atmosphereMaterial;
+
+      scene.updateMoonIllumination = function(illuminationPercentage, phaseName = '') {
+        const intensity = illuminationPercentage / 100;
+        const phaseAngle = (illuminationPercentage / 100) * Math.PI * 2;
+
+        sunLight.intensity = Math.max(0.3, intensity * 1.8);
+
+        const lightX = Math.cos(phaseAngle);
+        const lightZ = Math.sin(phaseAngle);
+        sunLight.direction = new BABYLON.Vector3(lightX, 0, lightZ);
+
+        moon.rotation.y = phaseAngle;
+
+        document.getElementById('phaseName').textContent = phaseName.replace(/_/g, ' ');
+        document.getElementById('illumination').textContent = illuminationPercentage.toFixed(1) + '%';
+      };
+
+      return scene;
+    }
+
+    const scene = createScene();
+
+    async function fetchMoonData(date = new Date()) {
+      const formattedDate = date.toISOString().split('T')[0];
+      const apiUrl = `http://localhost:8080/api/moon-phase?date=${formattedDate}&lat=${LATITUDE}&lon=${LONGITUDE}`;
+
+      try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+        const moonData = await response.json();
+        const illumination = parseFloat(moonData.Illumination || 100);
+        const phaseName = moonData.Phase || 'Unknown';
+
+        scene.updateMoonIllumination(illumination, phaseName);
+      } catch (error) {
+        console.error('Fetch error:', error);
+        scene.updateMoonIllumination(100, 'FULL_MOON');
+      }
+    }
+
+    engine.runRenderLoop(function() {
+      scene.render();
+    });
+
+    window.addEventListener('resize', function() {
+      engine.resize();
+    });
+
+    // ===== CALENDAR LOGIC =====
+    const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+                       'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+
+    const moonCache = {};
+
+    async function loadMoonDataForMonth(year, month) {
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const daysInMonth = lastDay.getDate();
+      const requests = [];
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = new Date(year, month, day).toISOString().split('T')[0];
+        if (!moonCache[dateStr]) {
+          requests.push(
+            fetch(`http://localhost:8080/api/moon-phase?date=${dateStr}&lat=${LATITUDE}&lon=${LONGITUDE}`)
+              .then(res => res.ok ? res.json() : null)
+              .then(data => {
+                if (data) moonCache[dateStr] = data;
+              })
+              .catch(err => console.error('Error:', err))
+          );
+        }
+      }
+
+      if (requests.length > 0) {
+        await Promise.all(requests);
+      }
+    }
+
+    async function renderCalendar(date) {
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      
+      // Загружаем все данные для месяца параллельно
+      await loadMoonDataForMonth(year, month);
+
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const daysInMonth = lastDay.getDate();
+      const startingDayOfWeek = firstDay.getDay();
+
+      document.getElementById('monthYear').textContent = `${monthNames[month]} ${year}`;
+
+      const grid = document.getElementById('daysGrid');
+      grid.innerHTML = '';
+
+      for (let i = 0; i < (startingDayOfWeek === 0 ? 6 : startingDayOfWeek - 1); i++) {
+        const emptyDay = document.createElement('div');
+        emptyDay.className = 'day other-month';
+        grid.appendChild(emptyDay);
+      }
+
+      const today = new Date();
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dayDiv = document.createElement('div');
+        dayDiv.className = 'day';
+        const dateStr = new Date(year, month, day).toISOString().split('T')[0];
+        dayDiv.dataset.date = dateStr;
+
+        const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+        if (isToday) dayDiv.classList.add('today');
+
+        dayDiv.innerHTML = `
+          <div class="day-number">${day}</div>
+          <div class="day-moon">🌙</div>
+        `;
+
+        const moonDiv = dayDiv.querySelector('.day-moon');
+        
+        // Берём данные из кэша
+        const moonData = moonCache[dateStr];
+        if (moonData) {
+          const illumination = parseFloat(moonData.Illumination || 50);
+          const phaseName = moonData.Phase || 'Unknown';
+          
+          const phaseEmojis = {
+            'NEW_MOON': '🌑',
+            'WAXING_CRESCENT': '🌒',
+            'FIRST_QUARTER': '🌓',
+            'WAXING_GIBBOUS': '🌔',
+            'FULL_MOON': '🌕',
+            'WANING_GIBBOUS': '🌖',
+            'LAST_QUARTER': '🌗',
+            'WANING_CRESCENT': '🌘'
+          };
+          
+          const emoji = phaseEmojis[phaseName] || '🌙';
+          moonDiv.textContent = emoji;
+          moonDiv.title = `${phaseName.replace(/_/g, ' ')}: ${illumination.toFixed(1)}%`;
+        }
+
+        dayDiv.addEventListener('click', () => {
+          currentDate = new Date(year, month, day);
+          fetchMoonData(currentDate);
+        });
+
+        grid.appendChild(dayDiv);
+      }
+    }
+
+    document.getElementById('prevMonth').addEventListener('click', async () => {
+      currentMonth.setMonth(currentMonth.getMonth() - 1);
+      await renderCalendar(currentMonth);
+    });
+
+    document.getElementById('nextMonth').addEventListener('click', async () => {
+      currentMonth.setMonth(currentMonth.getMonth() + 1);
+      await renderCalendar(currentMonth);
+    });
+
+    // Инициализация
+    renderCalendar(currentMonth);
+    fetchMoonData(currentDate);
+  </script>
+</body>
+</html>
